@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinic-service
+spec:
+  type: LoadBalancer                # 외부 접속용 로드밸런서 생성
+  selector:
+    app: petclinic
+  ports:
+    - port: 80                      # 브라우저 → 80
+      targetPort: 8080              # → 컨테이너 8080

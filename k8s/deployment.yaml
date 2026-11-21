@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic
+spec:
+  replicas: 2                       # PetClinic Pod 2개 유지
+  selector:
+    matchLabels:
+      app: petclinic
+  template:
+    metadata:
+      labels:
+        app: petclinic
+    spec:
+      containers:
+        - name: petclinic
+          image: 884002395647.dkr.ecr.us-west-2.amazonaws.com/user14-cluster-repo:v1   # ← CI ⑦ 이 자동으로 바꾸는 줄
+          ports:
+            - containerPort: 8080   # Spring Boot 기본 포트
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits:   { memory: 1Gi }
+          readinessProbe:           # 준비된 Pod에만 트래픽 전달
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5

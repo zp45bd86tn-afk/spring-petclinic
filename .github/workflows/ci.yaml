@@ -57,3 +57,17 @@ jobs:
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+
+    # ⑦ 배포 파일의 image 줄을 방금 만든 이미지로 변경
+    - name: Update Deployment YAML
+      run: |
+        sed -i "s|image: .*|image: $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}|" k8s/deployment.yaml
+
+    # ⑧ 바뀐 배포 파일을 GitHub 에 저장
+    #    [skip ci] : 이 커밋으로 CI 가 다시 실행되지 않게 (무한 반복 방지)
+    - name: Commit and push if there are changes
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions@github.com"
+        git add k8s/deployment.yaml
+        git diff --staged --quiet || (git commit -m "Deploy image ${GITHUB_SHA::7} [skip ci]" && git push)
